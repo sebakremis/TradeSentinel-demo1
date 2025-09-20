@@ -4,8 +4,21 @@
   <img src="https://static.streamlit.io/badges/streamlit_badge_black_white.svg" alt="Open in Streamlit">
 </a>
 
-## 📌 Overview
-`TradeSentinel` is a Python-powered dashboard for real-time portfolio monitoring, providing instant insights into PnL, exposure, and risk metrics throughout the trading day. Designed for trading operations and risk management teams, it helps detect limit breaches early and supports informed decision-making.
+### 📌 Overview (edited)
+
+TradeSentinel is a Python-powered dashboard for real-time portfolio monitoring, providing instant insights into PnL, exposure, and risk metrics throughout the trading day. Designed for trading operations and risk management teams, it helps detect limit breaches early and supports informed decision-making.
+
+The current demo is **stable** and has been validated through extensive testing:
+- Core metrics implemented in `metrics.py` were successfully tested in `test_metrics.py` and `test_metrics_edge_cases.py`.  
+- Historical data retrieved via **Yahoo Finance (yfinance)** was manually validated to ensure accuracy and consistency with market data.  
+
+Ongoing and planned improvements include:
+- Adding dedicated tests for the **Correlation Matrix** functionality.  
+- Expanding test coverage for the **Explore & Export PnL Data** section, particularly for filtered datasets.  
+- Refactoring `dashboard.py` to improve **modularity** and maintainability.  
+
+> Note: A private experimental variation of TradeSentinel's dashboard is also being developed in a separate repository to explore new features and architectural refinements.
+
 
 ## 🚀 Features
 - **Live market data:** Fetches intraday prices from APIs (Yahoo Finance).
