@@ -17,7 +17,8 @@ Ongoing and planned improvements include:
 - Expanding test coverage for the **Explore & Export PnL Data** section, particularly for filtered datasets.  
 - Refactoring `dashboard.py` to improve **modularity** and maintainability.  
 
-> Note: A private experimental variation of TradeSentinel's dashboard is also being developed in a separate repository to explore new features and architectural refinements.
+> Note: A private experimental variation of TradeSentinel's dashboard is also being developed in a separate repository to integrate more features for analysis.
+> 👉 [Launch the experimental demo here](https://tradesentinel.streamlit.app)
 
 
 ## 🚀 Features
@@ -60,6 +61,7 @@ Ongoing and planned improvements include:
 <a href="https://tradesentinel-rsnsu2pdi68sqey8ny7wzl.streamlit.app/" target="_blank">🌐 Click here to launch TradeSentinel on Streamlit Community Cloud</a>  
 _No installation required — runs directly in your browser._  
 *(Tip: On GitHub, links always open in the same tab. Right‑click and choose “Open link in new tab” if you prefer.)*
+
 
 ### Alternatively, clone the repo and run `dashboard.py` locally:
 ```bash
