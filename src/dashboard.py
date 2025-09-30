@@ -123,21 +123,12 @@ Ensure that `ensure_data.py` is available and properly configured to fetch marke
 
 import streamlit as st
 import pandas as pd
-import altair as alt
-import plotly.express as px
-import plotly.graph_objects as go
 
+
+from ui_sections import render_pnl_table, render_portfolio_summary, render_block
 from pnl_calc import calculate_pnl
 from ensure_data import ensure_prices
-from metrics import (
-    calculate_var,
-    calculate_cvar,
-    sharpe_ratio,
-    sortino_ratio,
-    calmar_ratio,
-    max_drawdown,
-    correlation_matrix,    
-)
+
 
 
 # --- Sidebar controls ---
@@ -241,281 +232,19 @@ if not st.session_state.data:
 # --- PnL Calculation (per ticker snapshot) ---
 pnl_data = calculate_pnl(data, quantities)
 
-# --- Display Per-Ticker Table ---
+# --- Display  ---
 if pnl_data is not None and not pnl_data.empty:
-
+    # --- Per-Ticker PnL Table ---
     df_pnl = pd.DataFrame(pnl_data)
-
-    st.subheader("📋 Per-Ticker PnL")
-
-    # Display with conditional coloring + formatted floats
-    st.dataframe(
-        df_pnl.style
-        .map(
-            lambda v: "color: green" if isinstance(v, (int, float)) and v > 0
-            else ("color: red" if isinstance(v, (int, float)) and v < 0 else ""),
-            subset=["PnL ($)", "Change (%)"]
-        )
-        .format({
-            "Quantity": "{:,.0f}",
-            "Start Price": "{:,.2f}",
-            "End Price": "{:,.2f}",
-            "PnL ($)": "{:,.2f}",
-            "Change (%)": "{:,.2f}",
-            "Position Value ($)": "{:,.2f}"
-        }),
-        # Use the new 'width="stretch"' syntax for this native Streamlit component
-        width="stretch" 
-    )
-
+    render_pnl_table(df_pnl)
 
     # --- Portfolio Summary + Pie Chart ---
-    total_pnl = df_pnl["PnL ($)"].sum()
-    total_value = df_pnl["Position Value ($)"].sum()
-    total_pct = (total_pnl / total_value) * 100 if total_value else 0.0
+    render_portfolio_summary(df_pnl)
+  
+    # --- Render Block: Chart - Allocation by Sector - Advanced Metrics - Editable Table ---
+    render_block(data, quantities)
 
-    st.subheader("📊 Portfolio Summary")
-    col1, col2 = st.columns([1, 1])
-
-    with col1:
-        st.metric("Total PnL ($)", f"${total_pnl:,.2f}")
-        st.metric("Total Position Value ($)", f"${total_value:,.2f}")
-        st.metric("Total Change (%)", f"{total_pct:.2f}%")
-
-    with col2:
-        pie_df = df_pnl[["Ticker", "Position Value ($)"]].copy()
-        total_value_pie = pie_df["Position Value ($)"].sum()
-
-        if not pie_df.empty and total_value_pie > 0:
-            pie_df["Percentage"] = (pie_df["Position Value ($)"] / total_value_pie) * 100
-
-            fig = px.pie(
-                pie_df,
-                names="Ticker",
-                values="Position Value ($)",
-                title="Portfolio Allocation by Ticker",
-                hole=0.3
-            )
-
-            fig.update_traces(textposition="inside", textinfo="percent+label")
-            fig.update_layout(showlegend=False, title_x=0.3)
-            # Use use_container_width=True to avoid the keyword argument deprecation warning
-            st.plotly_chart(fig, use_container_width=True) 
-        else:
-            st.info("No data available for allocation pie chart.")
-
-    # --- Portfolio PnL Over Time ---
-    st.subheader("📉 Portfolio PnL Over Time")
-    pnl_time_data = []
-    for ticker, df in st.session_state.data.items():
-        if df is not None and not df.empty:
-            try:
-                tmp = df.copy()
-                qty = quantities.get(ticker, 0)
-                tmp["Quantity"] = qty
-                tmp["Price"] = tmp["Close"]
-                tmp["Position Value ($)"] = tmp["Price"] * tmp["Quantity"]
-                tmp["PnL"] = (tmp["Price"] - tmp["Price"].iloc[0]) * tmp["Quantity"]
-                tmp["Ticker"] = ticker
-                tmp["Time"] = tmp.index
-                pnl_time_data.append(
-                    tmp[["Time", "Ticker", "Quantity", "Price", "Position Value ($)", "PnL"]]
-                )
-            except Exception as e:
-                st.warning(f"{ticker}: Error building time series - {e}")
-
-    if pnl_time_data:
-        combined_df = pd.concat(pnl_time_data, ignore_index=True)
-        chart = (
-            alt.Chart(combined_df)
-            .mark_line()
-            .encode(
-                x=alt.X("Time:T", title="Time"),
-                y=alt.Y("PnL:Q", title="PnL ($)"),
-                color=alt.Color("Ticker:N", title="Ticker"),
-            )
-            # Use Altair's 'container' to expand the chart (not 'stretch')
-            .properties(width='container', height=400)
-        )
-        # Use use_container_width=True to avoid the keyword argument deprecation warning
-        st.altair_chart(chart, use_container_width=True) 
-
-        # --- Portfolio Allocation by Sector ---
-        st.subheader("📊 Portfolio Allocation by Sector")
-        latest_data = []
-        for ticker, df in st.session_state.data.items():
-            if df is not None and not df.empty:
-                latest_close = df["Close"].iloc[-1]
-                qty = quantities.get(ticker, 0)
-                sector = df["Sector"].iloc[0] if "Sector" in df.columns and not df["Sector"].empty else "Unknown"
-                position_value = latest_close * qty
-                latest_data.append({
-                    "Ticker": ticker,
-                    "Sector": sector,
-                    "PositionValue": position_value
-                })
-
-        if latest_data:
-            sector_df = pd.DataFrame(latest_data)
-
-            sector_alloc = (
-                sector_df.groupby("Sector")
-                .agg({
-                    "PositionValue": "sum",
-                    "Ticker": lambda s: ", ".join(sorted(set(s)))
-                })
-                .reset_index()
-            )
-
-            total_val = sector_alloc["PositionValue"].sum()
-            sector_alloc["Percentage"] = (sector_alloc["PositionValue"] / total_val) * 100
-
-            fig_sector = go.Figure(
-                data=[
-                    go.Pie(
-                        labels=sector_alloc["Sector"],
-                        values=sector_alloc["PositionValue"],
-                        hole=0.3,
-                        textinfo="percent+label",
-                        textposition="inside",
-                        hoverinfo="skip"
-                    )
-                ]
-            )
-
-            fig_sector.update_layout(
-                title="Portfolio Allocation by Sector",
-                showlegend=False,
-                title_x=0.3,
-                margin=dict(l=10, r=10, t=60, b=10)
-            )
-
-            # Use use_container_width=True
-            st.plotly_chart(fig_sector, use_container_width=True)
-
-            # Use the new width='stretch' for st.dataframe (native component)
-            st.dataframe(
-                sector_alloc[["Sector", "Ticker"]],
-                width="stretch",
-                hide_index=True
-            )
-
-        else:
-            st.info("No data available for sector allocation chart.")
-
-        # --- Advanced Metrics Section ---
-        st.subheader("📊 Advanced Metrics")
-
-        portfolio_values = combined_df.groupby("Time")["Position Value ($)"].sum()
-        portfolio_returns = portfolio_values.pct_change().dropna()
-        cum_returns = (1 + portfolio_returns).cumprod().fillna(1)
-
-        var_95 = calculate_var(portfolio_returns, 0.95)
-        cvar_95 = calculate_cvar(portfolio_returns, 0.95)
-        sharpe = sharpe_ratio(portfolio_returns)
-        sortino = sortino_ratio(portfolio_returns)
-        calmar = calmar_ratio(portfolio_returns)
-        mdd = max_drawdown(cum_returns)
-
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("VaR (95%)", f"{var_95:.2%}")
-            st.metric("CVaR (95%)", f"{cvar_95:.2%}")
-        with col2:
-            st.metric("Sharpe Ratio", f"{sharpe:.2f}")
-            st.metric("Sortino Ratio", f"{sortino:.2f}")
-        with col3:
-            st.metric("Calmar Ratio", f"{calmar:.2f}")
-            st.metric("Max Drawdown", f"{mdd:.2%}")
-
-        # --- Asset Correlation Matrix ---
-        st.subheader("📈 Asset Correlation Matrix")
-
-        price_wide = combined_df.pivot(index="Time", columns="Ticker", values="Price")
-        corr_df = correlation_matrix(price_wide).round(6)
-
-        # Use the new width='stretch' for st.dataframe (native component)
-        st.dataframe(
-            corr_df.style.background_gradient(cmap="coolwarm", vmin=-1, vmax=1),
-            width="stretch"
-        )
-
-        # --- Editable Table: Interactive PnL Table with CSV Export ---
-        st.subheader("🔍 Explore & Export PnL Data")
-
-        tickers_selected = st.multiselect(
-            "Select Ticker(s)",
-            options=sorted(combined_df["Ticker"].unique().tolist()),
-            default=sorted(combined_df["Ticker"].unique().tolist()),
-            key="export_ticker_select"
-        )
-
-        date_min = combined_df["Time"].min().date()
-        date_max = combined_df["Time"].max().date()
-
-        date_range = st.date_input(
-            "Select Date Range",
-            value=(date_min, date_max),
-            min_value=date_min,
-            max_value=date_max,
-            key="export_date_range"
-        )
         
-        # Ensure date_range is a tuple of two dates
-        if isinstance(date_range, (list, tuple)) and len(date_range) == 2:
-            start_date = date_range[0]
-            end_date = date_range[1]
-        else:
-            start_date = date_min
-            end_date = date_max
-
-        filtered_df = combined_df[
-            combined_df["Ticker"].isin(tickers_selected)
-            & (combined_df["Time"].dt.date >= start_date)
-            & (combined_df["Time"].dt.date <= end_date)
-        ].copy()
-
-        if not filtered_df.empty:
-            total_pnl_filtered = filtered_df["PnL"].sum()
-            avg_pnl_filtered = filtered_df["PnL"].mean()
-            total_value_filtered = filtered_df["Position Value ($)"].sum()
-            avg_price_filtered = filtered_df["Price"].mean()
-
-
-            df_display = filtered_df.sort_values("Time", ascending=False).copy()
-
-            df_display["Date"] = df_display["Time"].dt.strftime("%Y-%m-%d")
-            df_display["Time"] = df_display["Time"].dt.strftime("%H:%M:%S")
-
-            cols = ["Date", "Time"] + [c for c in df_display.columns if c not in ["Date", "Time"]]
-            df_display = df_display[cols].reset_index(drop=True)
-
-            for col in ["Price", "Position Value ($)", "PnL"]:
-                if col in df_display.columns:
-                    df_display[col] = df_display[col].astype(float).round(2)
-
-            # Use the new width='stretch' for st.dataframe (native component)
-            st.dataframe(
-                df_display.style.format({
-                    "Quantity": "{:,.0f}",
-                    "Price": "{:,.2f}",
-                    "PnL": "{:,.2f}",
-                    "Position Value ($)": "{:,.2f}"
-                }),
-                width="stretch",
-                hide_index=True
-            )
-
-            filename = f"pnl_data_{'_'.join(tickers_selected)}_{start_date}_{end_date}.csv"
-            csv_data = df_display.to_csv(index=False).encode("utf-8")
-            st.download_button(
-                label="💾 Download filtered data as CSV",
-                data=csv_data,
-                file_name=filename,
-                mime="text/csv",
-            )
-        else:
-            st.info("No valid data to display. Try refreshing or adjusting filters.")
 
 
 # Credits
