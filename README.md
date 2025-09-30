@@ -55,7 +55,7 @@ In this new demo, the study interval is fixed to daily prices, as this timeframe
 ## 🚀 Launch the dashboard
 
 ### Live demo
-<a href="https://tradesentinel-rsnsu2pdi68sqey8ny7wzl.streamlit.app/" target="_blank">🌐 Click here to launch TradeSentinel on Streamlit Community Cloud</a>  
+<a href="https://tradesentinel-first-demo.streamlit.app/" target="_blank">🌐 Click here to launch TradeSentinel first demo on Streamlit Community Cloud</a>  
 _No installation required — runs directly in your browser._  
 *(Tip: On GitHub, links always open in the same tab. Right‑click and choose “Open link in new tab” if you prefer.)*
 
