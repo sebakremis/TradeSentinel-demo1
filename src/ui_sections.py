@@ -7,22 +7,39 @@ import plotly.graph_objects as go
 from metrics_service import compute_portfolio_metrics
 
 def render_pnl_table(pnl_df: pd.DataFrame):
+    """Render the Per-Ticker PnL table without numeric index,
+    sorted by descending PnL ($)."""
+
     st.subheader("📋 Per-Ticker PnL")
-    st.dataframe(
-        pnl_df.style
-        .map(lambda v: "color: green" if isinstance(v, (int, float)) and v > 0
-             else ("color: red" if isinstance(v, (int, float)) and v < 0 else ""),
-             subset=["PnL ($)", "Change (%)"])
+
+    if pnl_df.empty:
+        st.info("No PnL data available.")
+        return
+
+    # Sort by PnL descending
+    df_sorted = pnl_df.sort_values(by="PnL ($)", ascending=False).reset_index(drop=True)
+
+    # Apply styling: green for positive, red for negative
+    styled_df = (
+        df_sorted.style
+        .map(
+            lambda v: "color: green" if isinstance(v, (int, float)) and v > 0
+            else ("color: red" if isinstance(v, (int, float)) and v < 0 else ""),
+            subset=["PnL ($)", "Change (%)"]
+        )
         .format({
             "Quantity": "{:,.0f}",
             "Start Price": "{:,.2f}",
             "End Price": "{:,.2f}",
             "PnL ($)": "{:,.2f}",
             "Change (%)": "{:,.2f}",
-            "Position Value ($)": "{:,.2f}"
-        }),
-        width="stretch"
+            "Position Value ($)": "{:,.2f}",
+        })
     )
+
+    # Render without index
+    st.dataframe(styled_df, width="stretch", hide_index=True)
+
 
 def render_portfolio_summary(df_pnl: pd.DataFrame):
     total_pnl = df_pnl["PnL ($)"].sum()
