@@ -221,10 +221,7 @@ if st.sidebar.button("Update Portfolio"):
             interval=st.session_state.active_interval,
         )
 
-# --- Static hint ---
-st.sidebar.markdown(
-    "💡 If you need **intraday** price data, choose an interval shorter than 1 day."
-)
+
 
 # --- Use stored parameters for display (Direct Access) ---
 tickers = st.session_state.active_tickers
@@ -323,7 +320,7 @@ if pnl_data:
 
             fig.update_traces(textposition="inside", textinfo="percent+label")
             fig.update_layout(showlegend=False, title_x=0.3)
-            # FIX: Revert to use_container_width=True to avoid the keyword argument deprecation warning
+            # Use use_container_width=True to avoid the keyword argument deprecation warning
             st.plotly_chart(fig, use_container_width=True) 
         else:
             st.info("No data available for allocation pie chart.")
@@ -358,10 +355,10 @@ if pnl_data:
                 y=alt.Y("PnL:Q", title="PnL ($)"),
                 color=alt.Color("Ticker:N", title="Ticker"),
             )
-            # FIX: Use Altair's 'container' to expand the chart (not 'stretch')
+            # Use Altair's 'container' to expand the chart (not 'stretch')
             .properties(width='container', height=400)
         )
-        # FIX: Revert to use_container_width=True to avoid the keyword argument deprecation warning
+        # Use use_container_width=True to avoid the keyword argument deprecation warning
         st.altair_chart(chart, use_container_width=True) 
 
         # --- Portfolio Allocation by Sector ---
@@ -414,7 +411,7 @@ if pnl_data:
                 margin=dict(l=10, r=10, t=60, b=10)
             )
 
-            # FIX: Revert to use_container_width=True
+            # Use use_container_width=True
             st.plotly_chart(fig_sector, use_container_width=True)
 
             # Use the new width='stretch' for st.dataframe (native component)
