@@ -72,12 +72,17 @@ st.sidebar.title("Set portfolio to analyze:")
 init_state()
 
 # Editable table for tickers and quantities
-portfolio_df = st.sidebar.data_editor(
-    pd.DataFrame({
+# Helper function to build DataFrame for data_editor
+def get_portfolio_data_for_editor():
+    """Builds the input DataFrame for the data_editor."""
+    return pd.DataFrame({
         "Ticker": st.session_state.active_tickers,
         "Quantity": [st.session_state.active_quantities.get(t, 0)
                      for t in st.session_state.active_tickers]
-    }),
+    })
+
+portfolio_df = st.sidebar.data_editor(
+    get_portfolio_data_for_editor(),
     num_rows="dynamic",
     width="stretch"
 )
