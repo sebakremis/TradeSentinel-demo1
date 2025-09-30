@@ -5,7 +5,7 @@ Metrics Service
 This module provides functions to compute various financial metrics for a portfolio based on its profit and loss (PnL) data.
 """
 import pandas as pd
-from src.metrics import (calculate_var, calculate_cvar, sharpe_ratio, sortino_ratio, calmar_ratio, max_drawdown, correlation_matrix)
+from metrics import (calculate_var, calculate_cvar, sharpe_ratio, sortino_ratio, calmar_ratio, max_drawdown, correlation_matrix)
 
 def compute_portfolio_metrics(pnl_df: pd.DataFrame) -> dict:
     if pnl_df is None or pnl_df.empty:
