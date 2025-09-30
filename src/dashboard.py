@@ -126,49 +126,20 @@ import pandas as pd
 import altair as alt
 import plotly.express as px
 import plotly.graph_objects as go
-import numpy as np
-import datetime
 
-# --- DUMMY FUNCTION REPLACEMENTS FOR COLAB/JUPYTER COMPATIBILITY ---
-def ensure_prices(tickers, period, interval):
-    """Generates dummy data for the tickers."""
-    data = {}
-    end_date = pd.Timestamp.now().normalize()
-    
-    if interval.endswith('m') or period == '1d':
-        date_range = pd.date_range(end=end_date, periods=30, freq='15min')
-    elif period in ['1mo', '3mo']:
-        date_range = pd.date_range(end=end_date, periods=30, freq='D')
-    else:
-        date_range = pd.date_range(end=end_date, periods=100, freq='D')
 
-    for ticker in tickers:
-        np.random.seed(hash(ticker) % 1000)
-        base_price = np.random.uniform(50, 200)
-        returns = np.random.normal(0, 0.01, size=len(date_range)).cumsum()
-        prices = base_price * np.exp(returns)
-        
-        sector = np.random.choice(["Tech", "Finance", "Energy", "Healthcare"])
-        
-        df = pd.DataFrame({
-            "Close": prices,
-            "Sector": sector,
-        }, index=date_range)
-        
-        data[ticker] = df
-    return data
 
-# Placeholder metrics functions
-def calculate_var(returns, level): return 0.02 
-def calculate_cvar(returns, level): return 0.03
-def sharpe_ratio(returns): return 1.5
-def sortino_ratio(returns): return 2.0
-def calmar_ratio(returns): return 0.8
-def max_drawdown(cum_returns): return 0.15
-def correlation_matrix(price_wide): return price_wide.corr().fillna(0)
-def win_loss_stats(pnl): return 0
+from ensure_data import ensure_prices
+from metrics import (
+    calculate_var,
+    calculate_cvar,
+    sharpe_ratio,
+    sortino_ratio,
+    calmar_ratio,
+    max_drawdown,
+    correlation_matrix,    
+)
 
-# --- END OF DUMMY FUNCTIONS ---
 
 # --- Sidebar controls ---
 st.sidebar.title("Set portfolio to analyze:")
