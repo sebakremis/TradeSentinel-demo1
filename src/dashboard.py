@@ -124,36 +124,26 @@ Ensure that `ensure_data.py` is available and properly configured to fetch marke
 import streamlit as st
 import pandas as pd
 
-
 from ui_sections import render_pnl_table, render_portfolio_summary, render_block
 from pnl_calc import calculate_pnl
 from ensure_data import ensure_prices
-
-
+from state_manager import init_state, update_state
 
 # --- Sidebar controls ---
 st.sidebar.title("Set portfolio to analyze:")
 
-# Default portfolio data
-default_data = pd.DataFrame({
-    "Ticker": ["NVDA", "MSFT", "GOOGL"],
-    "Quantity": [100, 30, 70]
-})
+# Initialize defaults
+init_state()
 
-# Initialization Block
-if "active_tickers" not in st.session_state:
-    default_tickers = default_data["Ticker"].tolist()
-    default_quantities = dict(zip(default_data["Ticker"], default_data["Quantity"].astype(int)))
-    
-    st.session_state.active_tickers = default_tickers
-    st.session_state.active_quantities = default_quantities
-    st.session_state.active_period = "1mo"
-    st.session_state.active_interval = "1d"
-    st.session_state.data = ensure_prices(default_tickers, "1mo", "1d")
+
 
 # Editable table for tickers and quantities
 portfolio_df = st.sidebar.data_editor(
-    default_data,
+    pd.DataFrame({
+        "Ticker": st.session_state.active_tickers,
+        "Quantity": [st.session_state.active_quantities.get(t, 0)
+                     for t in st.session_state.active_tickers]
+    }),
     num_rows="dynamic",
     width="stretch"
 )
@@ -192,24 +182,9 @@ interval_input = st.sidebar.selectbox(
     key="interval_select"
 )
 
-# --- Update button (not refresh) ---
+# --- Update button ---
 if st.sidebar.button("Update Portfolio"):
-    tickers_input = portfolio_df["Ticker"].dropna().astype(str).str.strip().tolist()
-    quantities_input = portfolio_df["Quantity"]
-
-    st.session_state.active_tickers = tickers_input
-    st.session_state.active_quantities = dict(
-        zip(tickers_input, pd.Series(quantities_input).fillna(0).astype(int))
-    )
-    st.session_state.active_period = period_input
-    st.session_state.active_interval = interval_input
-
-    with st.spinner("Fetching market data..."):
-        st.session_state.data = ensure_prices(
-            st.session_state.active_tickers,
-            period=st.session_state.active_period,
-            interval=st.session_state.active_interval,
-        )
+    update_state(portfolio_df, period_input, interval_input)
 
 
 
@@ -243,10 +218,7 @@ if pnl_data is not None and not pnl_data.empty:
   
     # --- Render Block: Chart - Allocation by Sector - Advanced Metrics - Editable Table ---
     render_block(data, quantities)
-
-        
-
-
+      
 # Credits
 st.markdown("---")
 st.markdown(
