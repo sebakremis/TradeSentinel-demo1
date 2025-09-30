@@ -12,7 +12,6 @@ Features
 - Select historical data period and price interval with context-aware interval options.
 - Refresh data on demand with basic validation and helpful messages.
 - **Data fetching & caching:**
-- Retrieves market price data for the selected tickers using `ensure_prices` from `ensure_data.py`.
 - Caches data and user selections in `st.session_state` to avoid redundant fetches (`active_tickers`, `active_quantities`, `active_period`, `active_interval`, `data`).
 - **PnL & position metrics:**
 - Computes per ticker PnL in absolute ($) and percentage terms from first to last bar in the selected period/interval.
@@ -53,7 +52,6 @@ Dependencies
 - pandas
 - altair
 - plotly
-- ensure_data.ensure_prices
 - metrics (calculate_var, calculate_cvar, sharpe_ratio, sortino_ratio, calmar_ratio, max_drawdown, correlation_matrix, win_loss_stats)
 
 Notes
@@ -66,7 +64,6 @@ import pandas as pd
 
 from ui_sections import render_pnl_table, render_portfolio_summary, render_block
 from pnl_calc import calculate_pnl
-from ensure_data import ensure_prices
 from state_manager import init_state, update_state
 
 # --- Sidebar controls ---
