@@ -10,7 +10,6 @@ This repo is the first demo for the TradeSentinel project. Demo is **stable** an
 
 Ongoing and planned improvements include:
 - Adding dedicated tests for the **Correlation Matrix** functionality.  
-- Expanding test coverage for the **Explore & Export PnL Data** section, particularly for filtered datasets.  
 - Refactoring `dashboard.py` to improve **modularity** and maintainability.  
 
 > Note: A new demo for TradeSentinel has been developed in a private repository. This version builds on the original portfolio simulation dashboard and now includes individual ticker analysis, enabling users to construct and evaluate an Equally Weighted Portfolio. 
