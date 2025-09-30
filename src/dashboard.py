@@ -1,12 +1,124 @@
 # src/dashboard.py
 """
-FINAL CLEAN Streamlit dashboard script.
-- All sizing syntax is set to the most stable, modern, or correct standard.
-- Plotly chart sizing is reverted to use_container_width=True to avoid the 
-  'keyword arguments deprecated' warning, as the wrapper hasn't fully adopted 
-  the new 'width="stretch"' syntax yet.
-- Altair chart sizing uses the correct 'width='container'' to prevent Traceback.
-- Native Streamlit components use the modern 'width="stretch"'.
+
+dashboard.py
+
+============
+
+
+
+Streamlit dashboard for monitoring intraday and historical Profit & Loss (PnL), portfolio risk metrics, and asset/sector allocations for multiple tickers.
+
+
+
+Features
+
+--------
+
+- **Sidebar controls:**
+
+- Editable table (`st.data_editor`) for entering tickers and quantities (dynamic rows, instant updates).
+
+- Select historical data period and price interval with context-aware interval options.
+
+- Refresh data on demand with basic validation and helpful messages.
+
+
+
+- **Data fetching & caching:**
+
+- Retrieves market price data for the selected tickers using `ensure_prices` from `ensure_data.py`.
+
+- Caches data and user selections in `st.session_state` to avoid redundant fetches (`active_tickers`, `active_quantities`, `active_period`, `active_interval`, `data`).
+
+
+
+- **PnL & position metrics:**
+
+- Computes per ticker PnL in absolute ($) and percentage terms from first to last bar in the selected period/interval.
+
+- Calculates position values based on latest prices and quantities.
+
+- Adds Quantity, Price, and Position Value ($) columns to all outputs.
+
+- Handles missing or invalid data gracefully.
+
+
+
+- **Portfolio summary & allocation:**
+
+- Displays total PnL, total position value, and total % change.
+
+- Portfolio Allocation pie chart by ticker (Plotly), with labels inside slices and hidden legend.
+
+- Portfolio Allocation by sector (Plotly) plus a simplified sector-to-tickers table.
+
+
+
+- **Visualization:**
+
+- Styled per-ticker PnL DataFrame with green/red highlighting for gains/losses.
+
+- Portfolio PnL Over Time line chart by ticker (Altair).
+
+- Pie charts with percentage labels inside slices and centered titles.
+
+
+
+- **Advanced risk & performance metrics:**
+
+- VaR (95%), CVaR (95%), Sharpe, Sortino, Calmar ratios, and Max Drawdown computed from portfolio returns.
+
+- Asset Correlation Matrix table with gradient styling.
+
+- Win/Loss stats derived from PnL time series.
+
+
+
+- **Interactive PnL table with CSV export:**
+
+- Filter by ticker(s) and date range.
+
+- Shows filtered summary metrics (total/average PnL, position value in M$, average price).
+
+- Download filtered data as CSV (includes Quantity, Price, Position Value ($), and PnL) with a dynamic filename.
+
+
+
+Usage
+
+-----
+
+Run the dashboard with Streamlit:
+
+streamlit run src/dashboard.py
+
+
+
+Dependencies
+
+------------
+
+- streamlit
+
+- pandas
+
+- altair
+
+- plotly
+
+- ensure_data.ensure_prices
+
+- metrics (calculate_var, calculate_cvar, sharpe_ratio, sortino_ratio, calmar_ratio, max_drawdown, correlation_matrix, win_loss_stats)
+
+
+
+Notes
+
+-----
+
+Ensure that `ensure_data.py` is available and properly configured to fetch market data before running this dashboard.
+
 """
 
 import streamlit as st
@@ -422,15 +534,6 @@ if pnl_data:
             total_value_filtered = filtered_df["Position Value ($)"].sum()
             avg_price_filtered = filtered_df["Price"].mean()
 
-            m1, m2, m3, m4 = st.columns(4)
-            with m1:
-                st.metric("Total PnL (Filtered)", f"${total_pnl_filtered:,.2f}")
-            with m2:
-                st.metric("Average PnL (Filtered)", f"${avg_pnl_filtered:,.2f}")
-            with m3:
-                st.metric("Total Position Value (Filtered, M$)", f"{total_value_filtered/1_000_000:,.2f} M")
-            with m4:
-                st.metric("Average Price (Filtered)", f"${avg_price_filtered:,.2f}")
 
             df_display = filtered_df.sort_values("Time", ascending=False).copy()
 
