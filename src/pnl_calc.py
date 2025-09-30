@@ -6,6 +6,8 @@ def calculate_pnl(price_data: dict[str, pd.DataFrame], quantities: dict[str, flo
     Compute PnL for each ticker given price history and quantities.
     price_data: dict mapping ticker -> DataFrame with 'Close' column
     quantities: dict mapping ticker -> quantity held
+    Returns a DataFrame with PnL and percentage change for each ticker.
+    
     """
     results = []
     for ticker, df in price_data.items():

@@ -8,7 +8,7 @@ for one or more tickers using the Yahoo Finance API via the `yfinance` library.
 
 Features
 --------
-- Fetches historical OHLCV data for each ticker in **single‑ticker mode** to avoid MultiIndex columns.
+- Fetches historical OHLCV data for each ticker in **single-ticker mode** to avoid MultiIndex columns.
 - Supports configurable `period` and `interval` parameters.
 - Automatically adjusts prices for corporate actions (splits, dividends).
 - Ensures a 'Close' column exists:
@@ -42,7 +42,7 @@ Notes
 -----
 - If a ticker returns no data, it is skipped with a warning.
 - Any exceptions during download or sector lookup are caught and logged.
-- Sector lookups are best‑effort; failures result in Sector="Unknown" but do not
+- Sector lookups are best-effort; failures result in Sector="Unknown" but do not
   prevent price data from being returned.
 """
 
