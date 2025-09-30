@@ -11,7 +11,6 @@ def compute_portfolio_metrics(pnl_df: pd.DataFrame) -> dict:
     if pnl_df is None or pnl_df.empty:
         return {}
 
-    # 1. FIX: Calculate Portfolio Value over Time
     # Get the total portfolio market value for each time step.
     portfolio_value_series = pnl_df.groupby("Time")["Position Value ($)"].sum()
 

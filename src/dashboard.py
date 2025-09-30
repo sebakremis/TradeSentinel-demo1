@@ -58,14 +58,12 @@ Notes
 -----
 Ensure that `ensure_data.py` is available and properly configured to fetch market data before running this dashboard.
 """
-
 import streamlit as st
 import pandas as pd
 
 from ui_sections import render_pnl_table, render_portfolio_summary, render_block
 from pnl_calc import calculate_pnl
-from state_manager import init_state, update_state
-
+from state_manager import init_state, update_state, get_interval_settings
 
 # --- Sidebar controls ---
 st.sidebar.title("Set portfolio to analyze:")
@@ -92,24 +90,7 @@ period_input = st.sidebar.selectbox(
     key="period_select"
 )
 
-# Allowed intervals mapping
-interval_map = {
-    "1d": ["1m", "5m", "15m", "30m", "1h"],
-    "5d": ["5m", "15m", "30m", "1h", "1d"],
-    "1mo": ["15m", "30m", "1h", "1d", "1wk"],
-    "3mo": ["15m", "30m", "1h", "1d", "1wk"],
-    "6mo": ["1d", "1wk", "1mo"],
-    "1y": ["1d", "1wk", "1mo"],
-    "ytd": ["1d", "1wk", "1mo"],
-    "max": ["1d", "1wk", "1mo"]
-}
-
-interval_options = interval_map[period_input]
-
-default_interval_index = (
-    interval_options.index("30m") if period_input == "1d"
-    else interval_options.index("1d")
-)
+interval_options, default_interval_index = get_interval_settings(period_input)
 
 interval_input = st.sidebar.selectbox(
     "Interval",

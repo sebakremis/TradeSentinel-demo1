@@ -8,6 +8,25 @@ DEFAULT_PORTFOLIO = pd.DataFrame({
     "Quantity": [100, 30, 70]
 })
 
+def get_interval_settings(period):
+    """Return allowed intervals and default index based on selected period."""
+    interval_map = {
+        "1d": ["1m", "5m", "15m", "30m", "1h"],
+        "5d": ["5m", "15m", "30m", "1h", "1d"],
+        "1mo": ["15m", "30m", "1h", "1d", "1wk"],
+        "3mo": ["15m", "30m", "1h", "1d", "1wk"],
+        "6mo": ["1d", "1wk", "1mo"],
+        "1y": ["1d", "1wk", "1mo"],
+        "ytd": ["1d", "1wk", "1mo"],
+        "max": ["1d", "1wk", "1mo"]
+    }
+    options = interval_map.get(period, ["1d"])
+    if period == "1d":
+        default_index = options.index("30m") if "30m" in options else 0
+    else:
+        default_index = options.index("1d") if "1d" in options else 0
+    return options, default_index
+
 def init_state():
     """Initialize session state with defaults if not already set."""
     if "active_tickers" not in st.session_state:
