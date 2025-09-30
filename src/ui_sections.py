@@ -4,16 +4,7 @@ import pandas as pd
 import altair as alt
 import plotly.express as px
 import plotly.graph_objects as go
-
-from metrics import (
-    calculate_var,
-    calculate_cvar,
-    sharpe_ratio,
-    sortino_ratio,
-    calmar_ratio,
-    max_drawdown,
-    correlation_matrix,    
-)
+from metrics_service import compute_portfolio_metrics
 
 def render_pnl_table(pnl_df: pd.DataFrame):
     st.subheader("📋 Per-Ticker PnL")
@@ -70,8 +61,7 @@ def render_portfolio_summary(df_pnl: pd.DataFrame):
 
 
 
-def render_block(price_data: dict[str, pd.DataFrame],
-                     quantities: dict[str, int]) -> None:
+def render_block(price_data: dict, quantities: dict) -> None:
     """
     Render portfolio PnL over time chart.
 
@@ -105,6 +95,7 @@ def render_block(price_data: dict[str, pd.DataFrame],
 
     if pnl_time_data:
         combined_df = pd.concat(pnl_time_data, ignore_index=True)
+        
         chart = (
             alt.Chart(combined_df)
             .mark_line()
@@ -117,7 +108,10 @@ def render_block(price_data: dict[str, pd.DataFrame],
         )
         st.altair_chart(chart, use_container_width=True)
         render_portfolio_allocation(price_data, quantities)
-        render_advanced_metrics(combined_df)
+
+        # Rendering others:
+        metrics = compute_portfolio_metrics(combined_df)
+        render_advanced_metrics(combined_df, metrics)
         render_editable_table(combined_df)
 
 def render_portfolio_allocation(price_data: dict[str, pd.DataFrame],
@@ -184,38 +178,29 @@ def render_portfolio_allocation(price_data: dict[str, pd.DataFrame],
         else:
             st.info("No data available for sector allocation chart.")
 
-def render_advanced_metrics(combined_df: pd.DataFrame) -> None:
-
+def render_advanced_metrics(combined_df: pd.DataFrame, metrics: dict) -> None:
     st.subheader("📊 Advanced Metrics")
     portfolio_values = combined_df.groupby("Time")["Position Value ($)"].sum()
-    portfolio_returns = portfolio_values.pct_change().dropna()
-    cum_returns = (1 + portfolio_returns).cumprod().fillna(1)
-
-    var_95 = calculate_var(portfolio_returns, 0.95)
-    cvar_95 = calculate_cvar(portfolio_returns, 0.95)
-    sharpe = sharpe_ratio(portfolio_returns)
-    sortino = sortino_ratio(portfolio_returns)
-    calmar = calmar_ratio(portfolio_returns)
-    mdd = max_drawdown(cum_returns)
 
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric("VaR (95%)", f"{var_95:.2%}")
-        st.metric("CVaR (95%)", f"{cvar_95:.2%}")
+        st.metric("VaR (95%)", f"{metrics['VaR (95%)']:.2%}")
+        st.metric("CVaR (95%)", f"{metrics['CVaR (95%)']:.2%}")
     with col2:
-        st.metric("Sharpe Ratio", f"{sharpe:.2f}")
-        st.metric("Sortino Ratio", f"{sortino:.2f}")
+        st.metric("Sharpe Ratio", f"{metrics['Sharpe']:.2f}")
+        st.metric("Sortino Ratio", f"{metrics['Sortino']:.2f}")
     with col3:
-        st.metric("Calmar Ratio", f"{calmar:.2f}")
-        st.metric("Max Drawdown", f"{mdd:.2%}")
+        st.metric("Calmar Ratio", f"{metrics['Calmar']:.2f}")
+        st.metric("Max Drawdown", f"{metrics['Max Drawdown']:.2%}")
 
     # --- Asset Correlation Matrix ---
     st.subheader("📈 Asset Correlation Matrix")
 
     price_wide = combined_df.pivot(index="Time", columns="Ticker", values="Price")
-    corr_df = correlation_matrix(price_wide).round(6)
+    corr_df = metrics.get("Correlation Matrix")
+    if corr_df is None:
+        corr_df = price_wide.corr().round(6)  # fallback if not precomputed
 
-    # Use the new width='stretch' for st.dataframe (native component)
     st.dataframe(
         corr_df.style.background_gradient(cmap="coolwarm", vmin=-1, vmax=1),
         width="stretch"

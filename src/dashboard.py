@@ -66,6 +66,7 @@ from ui_sections import render_pnl_table, render_portfolio_summary, render_block
 from pnl_calc import calculate_pnl
 from state_manager import init_state, update_state
 
+
 # --- Sidebar controls ---
 st.sidebar.title("Set portfolio to analyze:")
 
@@ -148,7 +149,7 @@ if pnl_data is not None and not pnl_data.empty:
     # --- Portfolio Summary + Pie Chart ---
     render_portfolio_summary(df_pnl)
   
-    # --- Render Block: Chart - Allocation by Sector - Advanced Metrics - Editable Table ---
+    # --- Render Block: Chart - Allocation by Sector - Advanced Metrics - Editable Table ---    
     render_block(data, quantities)
       
 # Credits
