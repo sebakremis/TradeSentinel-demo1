@@ -127,8 +127,7 @@ import altair as alt
 import plotly.express as px
 import plotly.graph_objects as go
 
-
-
+from pnl_calc import calculate_pnl
 from ensure_data import ensure_prices
 from metrics import (
     calculate_var,
@@ -228,6 +227,7 @@ tickers = st.session_state.active_tickers
 quantities = st.session_state.active_quantities
 period = st.session_state.active_period
 interval = st.session_state.active_interval
+data = st.session_state.data
 
 # --- Title ---
 st.title("📈 TradeSentinel: Portfolio Monitor (demo)")
@@ -239,32 +239,11 @@ if not st.session_state.data:
 
 
 # --- PnL Calculation (per ticker snapshot) ---
-pnl_data = []
-for ticker, df in st.session_state.data.items():
-    if df is not None and not df.empty:
-        try:
-            start = df["Close"].iloc[0]
-            end = df["Close"].iloc[-1]
-
-            qty = quantities.get(ticker, 0)
-            weighted_pnl = (end - start) * qty
-            position_value = end * qty
-            pct = ((end - start) / start) * 100 if start != 0 else 0.0
-
-            pnl_data.append({
-                "Ticker": ticker,
-                "Quantity": qty,
-                "Start Price": start,
-                "End Price": end,
-                "PnL ($)": weighted_pnl,
-                "Change (%)": pct,
-                "Position Value ($)": position_value
-            })
-        except Exception as e:
-            st.warning(f"{ticker}: Error calculating PnL - {e}")
+pnl_data = calculate_pnl(data, quantities)
 
 # --- Display Per-Ticker Table ---
-if pnl_data:
+if pnl_data is not None and not pnl_data.empty:
+
     df_pnl = pd.DataFrame(pnl_data)
 
     st.subheader("📋 Per-Ticker PnL")
