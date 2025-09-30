@@ -1,30 +1,26 @@
 # TradeSentinel — Portfolio Monitor (demo)
 
-<a href="https://tradesentinel-rsnsu2pdi68sqey8ny7wzl.streamlit.app/" target="_blank">
-  <img src="https://static.streamlit.io/badges/streamlit_badge_black_white.svg" alt="Open in Streamlit">
-</a>
-
 ### 📌 Overview
 
-TradeSentinel is a Python-powered dashboard for real-time portfolio monitoring, providing instant insights into PnL, exposure, and risk metrics throughout the trading day. Designed for trading operations and risk management teams, it helps detect limit breaches early and supports informed decision-making.
+TradeSentinel is a Python-powered dashboard for real-time portfolio monitoring, providing insights into PnL, exposure, and risk metrics.
 
-The current demo is **stable** and has been validated through extensive testing:
+This repo is the first demo for the TradeSentinel project. Demo is **stable** and has been validated through extensive testing:
 - Core metrics implemented in `metrics.py` were successfully tested in `test_metrics.py` and `test_metrics_edge_cases.py`.  
 - Historical data retrieved via **Yahoo Finance (yfinance)** was manually validated to ensure accuracy and consistency with market data.  
 
 Ongoing and planned improvements include:
 - Adding dedicated tests for the **Correlation Matrix** functionality.  
-- Expanding test coverage for the **Explore & Export PnL Data** section, particularly for filtered datasets.  
 - Refactoring `dashboard.py` to improve **modularity** and maintainability.  
 
-> Note: A private experimental variation of TradeSentinel's dashboard is also being developed in a separate repository to integrate more features for analysis.
-> 👉 [Launch the experimental demo here](https://tradesentinel.streamlit.app)
+> Note: A new demo for TradeSentinel has been developed in a private repository. This version builds on the original portfolio simulation dashboard and now includes individual ticker analysis, enabling users to construct and evaluate an Equally Weighted Portfolio.
 
+👉 [Launch the new demo here](https://tradesentinel.streamlit.app)
+
+In this new demo, the study interval is fixed to daily prices, as this timeframe is the most suitable for the type of analysis performed in the project. Users can now focus on selecting the appropriate lookback period for their study, with the added flexibility of defining a custom lookback window by choosing specific start and end dates from a calendar.
 
 ## 🚀 Features
-- **Live market data:** Fetches intraday prices from APIs (Yahoo Finance).
-   * Supported intraday periods: `1m`, `5m`, `15m`, `30m`, `1h`.
-   * If a period of `1d` is selected, the last updated price corresponds to the **last daily close**.
+- **Live market data:** Fetches prices from APIs (Yahoo Finance).
+
 - **PnL tracking:** Calculates mark-to-market PnL by instrument, sector, or portfolio.
    * Note: For historical data, `TradeSentinel` uses adjusted close prices (via auto_adjust=True) to account for dividends and splits. This ensures that PnL calculations reflect total return and avoids artificial price drops on dividend dates.    
 - **Risk metrics:** Computes Value-at-Risk (VaR), exposure by asset class, and limit breaches.
@@ -55,10 +51,10 @@ Ongoing and planned improvements include:
 
 ---
 
-## 🚀 Launch the dashboard
+## 🚀 Launch the first demo
 
 ### Live demo
-<a href="https://tradesentinel-rsnsu2pdi68sqey8ny7wzl.streamlit.app/" target="_blank">🌐 Click here to launch TradeSentinel on Streamlit Community Cloud</a>  
+<a href="https://tradesentinel-first-demo.streamlit.app/" target="_blank">🌐 Click here to launch TradeSentinel first demo on Streamlit Community Cloud</a>  
 _No installation required — runs directly in your browser._  
 *(Tip: On GitHub, links always open in the same tab. Right‑click and choose “Open link in new tab” if you prefer.)*
 
