@@ -14,7 +14,7 @@ Ongoing and planned improvements include:
 
 > Note: A new demo for TradeSentinel has been developed in a private repository. This version builds on the original portfolio simulation dashboard and now includes individual ticker analysis, enabling users to construct and evaluate an Equally Weighted Portfolio.
 
-👉 [Launch the new demo here](https://tradesentinel.streamlit.app)
+👉 [Launch TradeSentinel-demo2 here](https://tradesentinel.streamlit.app)
 
 In this new demo, the study interval is fixed to daily prices, as this timeframe is the most suitable for the type of analysis performed in the project. Users can now focus on selecting the appropriate lookback period for their study, with the added flexibility of defining a custom lookback window by choosing specific start and end dates from a calendar.
 
