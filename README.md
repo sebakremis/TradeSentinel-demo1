@@ -1,4 +1,4 @@
-# TradeSentinel-demo1 — First Demo
+# TradeSentinel-demo1
 
 ### 📌 Overview
 
