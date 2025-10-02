@@ -115,7 +115,7 @@ interval = st.session_state.active_interval
 data = st.session_state.data
 
 # --- Title ---
-st.title("📈 TradeSentinel: Portfolio Monitor (demo)")
+st.title("📈 TradeSentinel-demo1")
 
 # --- Data Check ---
 if not st.session_state.data:
