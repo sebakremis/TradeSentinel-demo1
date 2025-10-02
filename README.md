@@ -1,4 +1,4 @@
-# TradeSentinel — Portfolio Monitor (demo)
+# TradeSentinel-demo1 — First Demo
 
 ### 📌 Overview
 
